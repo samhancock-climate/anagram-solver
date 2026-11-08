@@ -1,5 +1,5 @@
 // Bump CACHE when any file changes so installed copies pick up the update.
-const CACHE = "anagram-wheel-v13";
+const CACHE = "anagram-wheel-v14";
 // Note: "privacy" (not privacy.html): Cloudflare redirects *.html to the clean URL, and a service worker must never
 // answer a page navigation with a redirected response.
 const FILES = [
@@ -30,6 +30,7 @@ self.addEventListener("activate", (e) => {
 // Cache-first: works offline instantly; falls back to network for anything unexpected.
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+  if (new URL(e.request.url).origin !== self.location.origin) return; // only handle our own files
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then((hit) => {
       if (hit) return hit;

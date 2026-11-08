@@ -47,6 +47,22 @@ await ev(`window.__marker = 1`);
 await sleep(2500); // let the service worker install and claim the page
 check("no surprise reload on first visit", (await ev(`window.__marker === 1`)));
 check("service worker controls the page", await ev(`!!navigator.serviceWorker.controller`));
+// First-session update (iPhone home-screen apps stay open for days): an update that lands in the SAME page session
+// as the first install must still be applied by tapping Reload. (Regression: the page started uncontrolled, so the
+// reload used to be skipped.)
+if (!LIVE) {
+  server.transforms.set("/sw.js", (b) => b + "\n// version 1b\n");
+  await ev(`navigator.serviceWorker.getRegistration().then(r => r.update())`);
+  let shown1 = false;
+  for (let k = 0; k < 30 && !shown1; k++) { await sleep(200); shown1 = !(await ev(`document.getElementById('updateBar').hidden`)); }
+  check("first session: update bar appears", shown1);
+  await ev(`document.getElementById('updateBtn').click()`);
+  let reloaded1 = false;
+  for (let k = 0; k < 40 && !reloaded1; k++) { await sleep(200); try { reloaded1 = (await ev(`window.__marker === undefined && document.readyState === 'complete'`)); } catch {} }
+  check("first session: tapping Reload applies the update", reloaded1);
+  await ev(`window.__marker = 1`);
+}
+
 {
   // The Privacy link must work while the service worker is in control (clean-URL redirects broke this once).
   await ev(`document.querySelector('.hint a').click()`); await sleep(1200);

@@ -384,13 +384,25 @@ setupServiceWorker();
 // ---------- offline + updates ----------
 function setupServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
-  const hadController = !!navigator.serviceWorker.controller; // false on the very first visit
   let waiting = null;
+  let updateRequested = false; // only reload for an update the user asked for (the first install also fires controllerchange)
   const offerUpdate = (sw) => { waiting = sw; $("updateBar").hidden = false; };
-  $("updateBtn").addEventListener("click", () => waiting?.postMessage("SKIP_WAITING"));
+  $("updateBtn").addEventListener("click", async () => {
+    updateRequested = true;
+    $("updateBtn").disabled = true;
+    $("updateBtn").textContent = "Updating…";
+    // Use the registration's current waiting worker: the one we were told about may since have been replaced.
+    const reg = await navigator.serviceWorker.getRegistration().catch(() => null);
+    const sw = reg?.waiting || waiting;
+    sw?.postMessage("SKIP_WAITING");
+    // Safety net: iOS can be slow to (or never) fire controllerchange. Reload anyway; with nothing waiting, right away.
+    setTimeout(reload, sw ? 2500 : 0);
+  });
+  let reloading = false;
+  const reload = () => { if (!reloading) { reloading = true; location.reload(); } };
 
   navigator.serviceWorker.register("sw.js").then((reg) => {
-    if (reg.waiting && hadController) offerUpdate(reg.waiting);
+    if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
     reg.addEventListener("updatefound", () => {
       const sw = reg.installing;
       sw?.addEventListener("statechange", () => {
@@ -406,10 +418,5 @@ function setupServiceWorker() {
     });
   }).catch(() => {});
 
-  let reloading = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (!hadController || reloading) return; // first install also fires this; don't reload then
-    reloading = true;
-    location.reload();
-  });
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (updateRequested) reload(); });
 }
