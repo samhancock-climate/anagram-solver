@@ -42,7 +42,7 @@ If the user just wants specific answers to be findable (e.g. "hot dog stand"):
 3. Make sure `tools/check-data.mjs` passes and `public/sw.js` has a bumped `CACHE` version
    (`tools/bump-cache.mjs` does this; the refresh script already ran it once, so do not bump twice).
 4. Show `git status`/`git diff --stat`, then **ask before committing or pushing**. Suggested commit message:
-   `Refresh cheat data (<built date>)`. Pushing to the main branch deploys the site (Cloudflare Pages), so confirm first.
+   `Refresh cheat data (<built date>)`. Pushing to the main branch deploys the site (Cloudflare), so confirm first.
 
 ## Rules
 

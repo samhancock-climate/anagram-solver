@@ -12,10 +12,11 @@ An offline anagram helper for cryptic crosswords, built as a static PWA: no back
 
 | Path | What |
 |---|---|
-| `public/` | The deployable site (this is what Cloudflare Pages serves) |
+| `public/` | The deployable site (this is what Cloudflare serves) |
 | `public/core.js`, `search.js` | Pure logic (no DOM): board rules, storage validation, search |
 | `public/app.js`, `worker.js`, `sw.js` | UI, background search worker, service worker |
-| `public/_headers` | Security headers incl. Content-Security-Policy (Cloudflare Pages format) |
+| `public/_headers` | Security headers incl. Content-Security-Policy (Cloudflare `_headers` format) |
+| `wrangler.jsonc` | Cloudflare deploy config (serves `public/`) |
 | `public/data/` | Generated word + phrase lists |
 | `tools/` | Data pipeline (`refresh-data.sh`), see `tools/README.md` |
 | `tests/` | Unit tests and a headless-Chrome end-to-end test |
@@ -32,14 +33,17 @@ npm run test:e2e     # headless Chrome; set CHROME=/path/to/chrome if not at the
 After changing any file in `public/`, bump `CACHE` in `public/sw.js` (`node tools/bump-cache.mjs`) so installed copies update.
 Service workers need HTTPS or `localhost`, so offline mode can't be tested over a plain `http://192.168...` address.
 
-## Deploy (Cloudflare Pages)
+## Deploy (Cloudflare Workers static assets)
 
-1. Cloudflare dashboard -> Workers & Pages -> Create -> Pages -> Connect to Git -> pick this repository.
-2. Framework preset: **None**. Build command: *(leave empty)*. Build output directory: **`public`**. Production branch: `main`.
-3. Optional analytics: the Pages project -> Settings -> Web analytics -> Enable (cookieless; the CSP already allows its script).
-4. Optional: add a custom domain under the project's Custom domains tab.
+`wrangler.jsonc` tells Cloudflare to serve the `public/` folder (including its `_headers` file); there is no build step.
 
-Every push to `main` deploys. Headers in `public/_headers` are applied automatically.
+1. Cloudflare dashboard -> Workers & Pages -> Create -> connect this Git repository. Keep the project name `anagram-solver`
+   (it must match `name` in `wrangler.jsonc`).
+2. Build command: *(empty)*. Deploy command: `npx wrangler deploy` (the default). Preview command: the default. Root directory: empty.
+3. Optional analytics: the project's Settings -> Web analytics -> Enable (cookieless; the CSP already allows its script).
+4. Optional: add a custom domain under the project's Domains & Routes settings.
+
+Every push to `main` deploys.
 
 ## Data and licences
 
