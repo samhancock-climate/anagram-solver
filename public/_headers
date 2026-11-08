@@ -1,0 +1,17 @@
+# Cloudflare Pages applies these headers to the deployed site (the local test server in tests/server.mjs applies them too).
+# The CSP allows only this site's own files, plus Cloudflare Web Analytics (cookieless) if you switch it on.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data:; style-src 'self'; font-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000
+
+# The service worker must always be re-checked, or installed copies could never update.
+/sw.js
+  Cache-Control: no-cache
+
+# Word lists change rarely; the service worker keeps its own offline copy.
+/data/*
+  Cache-Control: public, max-age=3600

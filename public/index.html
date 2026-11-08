@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>A RAGMAN Solver</title>
+  <meta name="theme-color" content="#0b0d10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="A RAGMAN" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <h1>A RAGMAN Solver</h1>
+      <div class="top-actions">
+        <button id="historyBtn" class="icon-btn" aria-label="History" title="History">&#x23F2;&#xFE0E;</button>
+        <button id="themeBtn" class="icon-btn" aria-label="Toggle dark mode" title="Light / dark">&#x25D0;</button>
+      </div>
+    </header>
+
+    <form id="seedForm" class="seed-row" autocomplete="off">
+      <div class="seed-wrap">
+        <input id="seed" class="input" type="text" placeholder="Enter letters…" enterkeyhint="go"
+               autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="80" aria-label="Letters" />
+        <button id="seedClear" class="seed-clear" type="button" aria-label="Clear letters" hidden>&times;</button>
+      </div>
+      <button class="go" type="submit">Go</button>
+    </form>
+    <p id="seedError" class="warn" role="alert" hidden></p>
+
+    <section id="wheel" class="wheel" aria-label="Letter wheel">
+      <button class="shuffle" data-action="wheel-shuffle" aria-label="Shuffle the wheel letters">&#x21BB;</button>
+    </section>
+
+    <section class="boxes-wrap">
+      <div id="boxes" class="boxes" aria-label="Answer boxes"></div>
+    </section>
+
+    <div class="enum-row">
+      <span id="count" class="count"></span>
+      <label for="enum">Word lengths</label>
+      <input id="enum" class="input small" type="text" placeholder="e.g. 3,3-5"
+             autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Word lengths, optional" />
+    </div>
+    <span id="enumWarn" class="warn" hidden></span>
+
+    <div class="actions">
+      <button class="pill" data-action="shuffle">Shuffle</button>
+      <button id="placeBtn" class="pill">Place all</button>
+      <button id="clearBtn" class="pill">Return</button>
+    </div>
+    <button id="cheatBtn" class="cheat-btn">Cheat: find answers</button>
+    <p id="hint" class="hint">Tap letters to place them. Drag to move or swap. Press and hold a filled box to lock it.</p>
+    <p class="hint"><a href="privacy.html">Privacy &amp; credits</a></p>
+  </main>
+
+  <aside id="drawer" class="drawer" hidden>
+    <div class="drawer-head">
+      <h2>History</h2>
+      <button id="clearHistoryBtn" class="pill small">Clear all</button>
+      <button id="closeHistoryBtn" class="icon-btn" aria-label="Close history">&times;</button>
+    </div>
+    <ul id="historyList" class="history-list"></ul>
+    <p id="historyEmpty" class="hint" hidden>No history yet. Enter some letters.</p>
+  </aside>
+  <aside id="cheat" class="drawer wide" hidden>
+    <div class="drawer-head">
+      <h2>Cheat</h2>
+      <button id="closeCheatBtn" class="icon-btn" aria-label="Close cheat">&times;</button>
+    </div>
+    <p id="cheatInfo" class="hint"></p>
+    <label class="toggle"><input type="checkbox" id="rareToggle" /> Include rarer words in combinations</label>
+    <div id="cheatBody" aria-live="polite"></div>
+    <details class="credits">
+      <summary>Data sources</summary>
+      <p>Word list: SCOWL / ESDB (British -ise spelling), &copy; 2000&ndash;2026 Kevin Atkinson, used under its permissive licence (https://wordlist.aspell.net).</p>
+      <p>Phrases and names: Wikipedia article titles ranked by page views (Wikimedia, CC BY-SA 4.0), Wiktionary entry titles (CC BY-SA 4.0), and GeoNames cities (CC BY 4.0, https://www.geonames.org).</p>
+    </details>
+  </aside>
+  <div id="scrim" class="scrim" hidden></div>
+
+  <div id="updateBar" class="update-bar" role="status" hidden>
+    <span>A new version is ready.</span>
+    <button id="updateBtn" type="button">Reload</button>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

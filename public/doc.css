@@ -1,0 +1,8 @@
+/* Layout for static text pages (privacy.html). */
+.doc-main { line-height: 1.55; padding-bottom: 48px; }
+.doc-main h1 { font-size: 1.5rem; margin: 8px 0 0; }
+.doc-main h2 { font-size: 1.05rem; margin: 20px 0 0; flex: none; }
+.doc-main p, .doc-main li { color: var(--text); font-size: 0.95rem; margin: 6px 0; }
+.doc-main a { color: var(--accent); }
+.doc-main ul { padding-left: 20px; }
+body.doc { -webkit-user-select: text; user-select: text; }

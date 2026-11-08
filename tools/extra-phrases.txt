@@ -1,0 +1,4 @@
+# Hand-curated answers that must always be findable by the Cheat button.
+# One per line; blank lines and lines starting with # are ignored. Hyphens and spaces both mark word breaks.
+# These always rank above everything else and survive every data refresh. Add answers you've met that weren't found.
+hot dog stand
