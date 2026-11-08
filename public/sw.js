@@ -1,5 +1,5 @@
 // Bump CACHE when any file changes so installed copies pick up the update.
-const CACHE = "anagram-wheel-v14";
+const CACHE = "anagram-wheel-v15";
 // Note: "privacy" (not privacy.html): Cloudflare redirects *.html to the clean URL, and a service worker must never
 // answer a page navigation with a redirected response.
 const FILES = [

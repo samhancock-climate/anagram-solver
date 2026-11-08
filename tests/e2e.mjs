@@ -24,7 +24,7 @@ ws.onmessage = (m) => {
   const d = JSON.parse(m.data);
   if (d.id && pending.has(d.id)) { pending.get(d.id)(d); pending.delete(d.id); return; }
   // Anything the browser complains about (CSP violations, uncaught errors) fails the run.
-  if (d.method === "Log.entryAdded" && ["error", "warning"].includes(d.params.entry.level) && !/favicon/.test(d.params.entry.text + (d.params.entry.url || ""))) problems.push("log: " + d.params.entry.text);
+  if (d.method === "Log.entryAdded" && ["error", "warning"].includes(d.params.entry.level) && !/favicon|cloudflareinsights/.test(d.params.entry.text + (d.params.entry.url || ""))) problems.push("log: " + d.params.entry.text);
   if (d.method === "Runtime.exceptionThrown") problems.push("exception: " + (d.params.exceptionDetails.exception?.description || d.params.exceptionDetails.text));
 };
 const send = (method, params = {}) => new Promise((res) => { const i = ++id; pending.set(i, res); ws.send(JSON.stringify({ id: i, method, params })); });
@@ -40,6 +40,8 @@ const results = [];
 const check = (name, ok, extra = "") => { results.push(ok); console.log(ok ? "PASS" : "FAIL", name, extra); };
 
 await send("Log.enable");
+// Test runs must not count as visits in the real analytics: block the beacon (and ignore the resulting log noise).
+await send("Network.setBlockedURLs", { urls: ["*cloudflareinsights.com*"] });
 await send("Page.enable"); await send("Runtime.enable"); await send("Network.enable");
 await send("Emulation.setDeviceMetricsOverride", { width: 375, height: 700, deviceScaleFactor: 2, mobile: true });
 await send("Page.navigate", { url: URL }); await sleep(1500);
