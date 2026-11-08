@@ -30,7 +30,14 @@ export function startServer(port = 0, host = "127.0.0.1") {
   const transforms = new Map(); // url path -> (body: string) => string
   const server = http.createServer((req, res) => {
     let url = decodeURIComponent(new URL(req.url, "http://x").pathname);
+    // Mimic Cloudflare's clean URLs: /x.html redirects to /x, and /x serves x.html. (This once hid a real bug.)
+    if (url.endsWith(".html")) {
+      res.writeHead(307, { Location: url === "/index.html" ? "/" : url.slice(0, -5) });
+      res.end();
+      return;
+    }
     if (url.endsWith("/")) url += "index.html";
+    else if (!path.extname(url) && fs.existsSync(path.join(ROOT, url + ".html"))) url += ".html";
     const file = path.join(ROOT, url);
     if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory() || url === "/_headers") {
       res.writeHead(404); res.end("not found"); return;

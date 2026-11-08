@@ -7,7 +7,9 @@ import { startServer } from "./server.mjs";
 
 const CHROME = process.env.CHROME || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const TMP = fs.mkdtempSync(os.tmpdir() + "/aw-e2e-");
-const server = await startServer();
+// E2E_URL=https://... runs the same checks against a deployed site (skips the ones that need to alter the server).
+const LIVE = process.env.E2E_URL;
+const server = LIVE ? { url: LIVE.replace(/\/?$/, "/"), transforms: new Map(), close() {} } : await startServer();
 const URL = server.url;
 const PORT = 9333;
 const proc = spawn(CHROME, ["--headless=new", `--remote-debugging-port=${PORT}`, `--user-data-dir=${TMP}/profile`, "--no-first-run", "about:blank"], { stdio: "ignore" });
@@ -44,6 +46,14 @@ await send("Page.navigate", { url: URL }); await sleep(1500);
 await ev(`window.__marker = 1`);
 await sleep(2500); // let the service worker install and claim the page
 check("no surprise reload on first visit", (await ev(`window.__marker === 1`)));
+check("service worker controls the page", await ev(`!!navigator.serviceWorker.controller`));
+{
+  // The Privacy link must work while the service worker is in control (clean-URL redirects broke this once).
+  await ev(`document.querySelector('.hint a').click()`); await sleep(1200);
+  const ok = await ev(`document.querySelector('h1')?.textContent === 'Privacy & credits'`);
+  check("privacy page opens via the link (with service worker)", ok, await ev(`location.pathname + ' | ' + document.title`));
+  await send("Page.navigate", { url: URL }); await sleep(1200);
+}
 
 // 1. basic flow + tap
 await submit("tears"); await sleep(200);
@@ -181,7 +191,7 @@ for (const [label, junk] of [["not JSON", "{{{not json"], ["wrong type", JSON.st
 await submit("listen"); await sleep(100);
 
 // 4d. update prompt: a changed sw.js is offered, not forced
-{
+if (!LIVE) {
   await sleep(500);
   check("no update bar before an update", await ev(`document.getElementById('updateBar').hidden`));
   server.transforms.set("/sw.js", (b) => b + "\n// version 2\n");
@@ -209,6 +219,10 @@ await ev(`document.getElementById('cheatBtn').click()`);
 let offText = "";
 for (let k = 0; k < 40; k++) { await sleep(250); offText = await ev(`document.getElementById('cheatBody').innerText`); if (!/Searching/.test(offText) && offText) break; }
 check("cheat works offline", /Words/i.test(offText) && !/aren't available/.test(offText), offText.slice(0, 60).replace(/\n/g, " | "));
+await send("Page.navigate", { url: URL }); await sleep(1200);
+await ev(`document.querySelector('.hint a').click()`); await sleep(1200);
+check("privacy page opens offline", await ev(`document.querySelector('h1')?.textContent === 'Privacy & credits'`), await ev(`location.pathname`));
+await send("Page.navigate", { url: URL }); await sleep(1000);
 await shot("shot-offline");
 
 check("no CSP violations, console errors or exceptions", problems.length === 0, problems.slice(0, 5).join(" || "));

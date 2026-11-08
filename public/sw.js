@@ -1,8 +1,10 @@
 // Bump CACHE when any file changes so installed copies pick up the update.
-const CACHE = "anagram-wheel-v12";
+const CACHE = "anagram-wheel-v13";
+// Note: "privacy" (not privacy.html): Cloudflare redirects *.html to the clean URL, and a service worker must never
+// answer a page navigation with a redirected response.
 const FILES = [
   "./", "index.html", "style.css", "app.js", "core.js", "search.js", "worker.js", "manifest.webmanifest",
-  "privacy.html", "doc.css", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
+  "privacy", "doc.css", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png",
 ];
 // The big word lists (data/) are NOT fetched here, so installing never competes with the first load.
 // The app requests them once it is idle, and the fetch handler below saves them for offline use.
